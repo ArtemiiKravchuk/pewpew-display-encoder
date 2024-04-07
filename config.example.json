@@ -1,9 +1,10 @@
 {
-  "logs_path": null,
+  "logs_path": "/logs",
   "input_path": "image.jpg",
+  "size_factor": 10,
   "conversion_settings": {
-    "to_bilevel": {
-      "threshold": 0.5
+    "resize": {
+      "mode": "resize"
     }
   }
 }
