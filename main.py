@@ -6,10 +6,10 @@ import sys
 import os
 
 from PIL import Image
-
 from loguru import logger
 
-DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
+import modules.transform as tf
+import modules.encode as ec
 
 
 def sigint_handler(sig, frame):
@@ -113,97 +113,6 @@ def load_image(image_path: str) -> Image:
     return image
 
 
-def to_bilevel(image: Image, sets: dict) -> Image:
-    """Convert image to black and white"""
-    logger.debug("Converting image to black and white, settings: <w>{}</>",
-                 sets)
-    # image = image.convert("L")  # convert image to greyscale
-    image = image.convert("1", dither=Image.Dither.FLOYDSTEINBERG)
-
-    return image
-
-
-def get_size(size_factor: int) -> tuple[int, int]:
-    """Get size from size factor, using the formula"""
-    logger.debug("Getting size, size_factor: <m>{}</>", size_factor)
-
-    width = size_factor * 14
-    height = 1200 // size_factor
-    logger.trace("Got size: <w>{}</>", (width, height))
-
-    return width, height
-
-
-def resize_image(image: Image, size_factor: int, sets: dict) -> Image:
-    """Resize image"""
-    logger.debug(
-        "Resizing image, size_factor: <m>{}</>, settings: <w>{}</>",
-        size_factor, sets
-    )
-
-    size = get_size(size_factor)
-    default_mode = "resize"
-    if sets is not None:
-        mode = sets.get("mode", default_mode)
-    else:
-        mode = default_mode
-
-    if mode == "crop":
-        image = image.crop((0, 0, size[0], size[1]))
-    elif mode == "resize":
-        image = image.resize(size)
-    # [TODO: implement]
-    #  elif mode == "reduce":
-    #      image = image.reduce(size)
-    else:
-        logger.error("Got unknown resize mode: <m>{}</>", mode)
-        sys.exit(1)
-
-    return image
-
-
-# [TODO: support different set size (not just 3)]
-def encode_36(num: int, sets: dict) -> str:
-    """Encode number with 36byte system, custom alphabet"""
-    # logger.trace("Encoding number, num: <m>{}</>, settings: <w>{}</>",
-    #              num, sets)
-
-    alphabet = sets.get("alphabet", DEFAULT_ALPHABET)
-    s = len(alphabet)
-
-    # thanks, glebi, i stole this :з
-    result1 = alphabet[num // (s ** 2)]
-    result2 = alphabet[(num // s) % s]
-    result3 = alphabet[num % s]
-
-    return result1 + result2 + result3
-
-
-def encode_image(size_factor: int, image: Image, sets: dict) -> Image:
-    """Encode image"""
-    logger.debug("Encoding image, size_factor: <m>{}</>, settings: <w>{}</>",
-                 size_factor, sets)
-
-    encoded_size = encode_36(size_factor, sets)
-
-    # [TODO: fix some awful code]
-    image_bytes = [str(bin(x))[2:].ljust(8, "0") for x in image.tobytes()]
-
-    individual_bytes = []
-    for x in image_bytes:
-        individual_bytes += x
-
-    encoded = encoded_size
-    for i in range(len(individual_bytes)//14):
-        encoded += encode_36(int("".join(individual_bytes[:14]), base=2), sets)
-        individual_bytes = individual_bytes[14:]
-        # logger.trace("Encoded bytes: <m>{}</>", encoded)
-
-    # image.save("results.png")
-
-    return 'return"' + encoded + '"'
-
-
 def main(config_file: str = "config.json") -> None:
     """Start the encoder"""
     global client, config
@@ -215,10 +124,10 @@ def main(config_file: str = "config.json") -> None:
     encoding_sets = config.get("encoding", {})
 
     image = load_image(config.get("input_path"))
-    image = to_bilevel(image, conv_sets["to_bilevel"])
-    image = resize_image(image, size_factor, conv_sets["resize"])
+    image = tf.to_bilevel(image, conv_sets["to_bilevel"])
+    image = tf.resize_image(image, size_factor, conv_sets["resize"])
 
-    result = encode_image(size_factor, image, encoding_sets)
+    result = ec.encode_image(size_factor, image, encoding_sets)
     # logger.opt(colors=False).success(result)
     with open("results.lua", "w", encoding="UTF-8") as file:
         file.write(result)
