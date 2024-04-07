@@ -9,6 +9,8 @@ from PIL import Image
 
 from loguru import logger
 
+DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
+
 
 def sigint_handler(sig, frame):
     """Handle SIGINT signal (e.g. Ctrl+C)"""
@@ -160,6 +162,23 @@ def resize_image(image: Image, size_factor: int, sets: dict) -> Image:
     return image
 
 
+# [TODO: support different set size (not just 3)]
+def encode_36(num: int, sets: dict) -> str:
+    """Encode number with 36byte system, custom alphabet"""
+    logger.trace("Encoding number, num: <m>{}</>, settings: <w>{}</>",
+                 num, sets)
+
+    alphabet = sets.get("alphabet", DEFAULT_ALPHABET)
+    s = len(alphabet)
+
+    # thanks, glebi, i stole this :з
+    result1 = alphabet[num // s ** 2]
+    result2 = alphabet[num // s % s]
+    result3 = alphabet[num % s]
+
+    return result1 + result2 + result3
+
+
 def main(config_file: str = "config.json") -> None:
     """Start the encoder"""
     global client, config
@@ -168,12 +187,15 @@ def main(config_file: str = "config.json") -> None:
     config = setup(config_file)
     size_factor = config.get("size_factor", 10)
     conv_sets = get_conv_sets(config)
+    encoding_sets = config.get("encoding", {})
 
     image = load_image(config.get("input_path"))
     image = to_bilevel(image, conv_sets["to_bilevel"])
     image = resize_image(image, size_factor, conv_sets["resize"])
 
-    image.save('result.png')
+    print(encode_36(size_factor, encoding_sets))
+
+    image.save("result.png")
 
     logger.info("Job done, exiting...")
 
