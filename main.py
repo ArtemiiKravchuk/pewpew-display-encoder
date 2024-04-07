@@ -47,6 +47,25 @@ def setup(config_path: str) -> None:
     return config
 
 
+def get_conv_sets(config: dict) -> dict:
+    """Get conversion settings"""
+    logger.debug("Getting conversion settings")
+    conv_sets = config.get("conversion_settings")
+    if conv_sets is not None:
+        to_bilevel = conv_sets.get("to_bilevel")
+        resize = conv_sets.get("resize")
+    else:
+        to_bilevel = None
+        resize = None
+
+    results = {
+        "to_bilevel": to_bilevel,
+        "resize": resize
+    }
+    logger.trace("Got conversion settings: <w>{}</>", results)
+    return results
+
+
 def load_image(image_path: str) -> Image:
     """Load image from disk"""
     logger.debug("Loading image from <m>{}</>", image_path)
@@ -55,7 +74,7 @@ def load_image(image_path: str) -> Image:
     return image
 
 
-def convert_black_and_white(image: Image) -> Image:
+def convert_black_and_white(image: Image, sets: dict) -> Image:
     """Convert image to black and white"""
     logger.debug("Converting image to black and white")
     # image = image.convert("L")  # convert image to greyscale
@@ -64,10 +83,10 @@ def convert_black_and_white(image: Image) -> Image:
     return image
 
 
-def resize_image(image: Image, new_size: tuple) -> Image:
+def resize_image(image: Image, sets: dict) -> Image:
     """Resize image"""
-    logger.debug("Resizing image to <m>{}</>", new_size)
-    image = image.resize(new_size)
+    logger.debug("Resizing image to <m>{}</>", (140, 120))
+    image = image.resize((140, 120))
 
     return image
 
@@ -78,10 +97,11 @@ def main(config_file: str = "config.json") -> None:
     logger.info("Starting the encoder... (config_file=<m>{}</>)", config_file)
 
     config = setup(config_file)
+    conv_sets = get_conv_sets(config)
 
     image = load_image(config["input_path"])
-    image = convert_black_and_white(image)
-    image = resize_image(image, (140, 120))
+    image = convert_black_and_white(image, conv_sets["to_bilevel"])
+    image = resize_image(image, conv_sets["resize"])
 
     image.save('result.png')
 
