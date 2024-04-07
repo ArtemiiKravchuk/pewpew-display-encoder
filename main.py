@@ -74,11 +74,12 @@ def load_image(image_path: str) -> Image:
     return image
 
 
-def convert_black_and_white(image: Image, sets: dict) -> Image:
+def to_bilevel(image: Image, sets: dict) -> Image:
     """Convert image to black and white"""
-    logger.debug("Converting image to black and white")
+    logger.debug("Converting image to black and white, settings: <w>{}</>",
+                 sets)
     # image = image.convert("L")  # convert image to greyscale
-    image = image.convert("1")
+    image = image.convert("1", dither=Image.Dither.FLOYDSTEINBERG)
 
     return image
 
@@ -100,7 +101,7 @@ def main(config_file: str = "config.json") -> None:
     conv_sets = get_conv_sets(config)
 
     image = load_image(config["input_path"])
-    image = convert_black_and_white(image, conv_sets["to_bilevel"])
+    image = to_bilevel(image, conv_sets["to_bilevel"])
     image = resize_image(image, conv_sets["resize"])
 
     image.save('result.png')

@@ -1,0 +1,9 @@
+{
+  "logs_path": null,
+  "input_path": "image.jpg",
+  "conversion_settings": {
+    "to_bilevel": {
+      "threshold": 0.5
+    }
+  }
+}
