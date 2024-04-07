@@ -5,6 +5,8 @@ import json
 import sys
 import os
 
+from PIL import Image
+
 from loguru import logger
 
 
@@ -45,12 +47,43 @@ def setup(config_path: str) -> None:
     return config
 
 
+def load_image(image_path: str) -> Image:
+    """Load image from disk"""
+    logger.debug("Loading image from <m>{}</>", image_path)
+    image = Image.open(image_path)
+
+    return image
+
+
+def convert_black_and_white(image: Image) -> Image:
+    """Convert image to black and white"""
+    logger.debug("Converting image to black and white")
+    # image = image.convert("L")  # convert image to greyscale
+    image = image.convert("1")
+
+    return image
+
+
+def resize_image(image: Image, new_size: tuple) -> Image:
+    """Resize image"""
+    logger.debug("Resizing image to <m>{}</>", new_size)
+    image = image.resize(new_size)
+
+    return image
+
+
 def main(config_file: str = "config.json") -> None:
     """Start the encoder"""
     global client, config
     logger.info("Starting the encoder... (config_file=<m>{}</>)", config_file)
 
     config = setup(config_file)
+
+    image = load_image(config["input_path"])
+    image = convert_black_and_white(image)
+    image = resize_image(image, (140, 120))
+
+    image.save('result.png')
 
     logger.info("Job done, exiting...")
 
