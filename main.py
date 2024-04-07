@@ -52,7 +52,7 @@ def setup(config_path: str) -> None:
     logger.remove(0)
     logger = logger.opt(colors=True)
 
-    logger.add(sys.stderr, level="DEBUG")
+    logger.add(sys.stderr, level="TRACE")
 
     config = load_config(config_path)
 
@@ -64,7 +64,7 @@ def setup(config_path: str) -> None:
             os.makedirs(logs_path)
 
         logger.add(os.path.join(
-            logs_path, "log-{time}.log"), rotation="00:00", level="DEBUG")
+            logs_path, "log-{time}.log"), rotation="00:00", level="TRACE")
 
     logger.debug("Registering signal handler for <y>{}</>",
                  "signal.SIGINT")
@@ -165,8 +165,8 @@ def resize_image(image: Image, size_factor: int, sets: dict) -> Image:
 # [TODO: support different set size (not just 3)]
 def encode_36(num: int, sets: dict) -> str:
     """Encode number with 36byte system, custom alphabet"""
-    logger.trace("Encoding number, num: <m>{}</>, settings: <w>{}</>",
-                 num, sets)
+    # logger.trace("Encoding number, num: <m>{}</>, settings: <w>{}</>",
+    #              num, sets)
 
     alphabet = sets.get("alphabet", DEFAULT_ALPHABET)
     s = len(alphabet)
