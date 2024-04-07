@@ -28,7 +28,7 @@ Using config file is optional, but recommended if you want to change some settin
 
 Here is a description of all the possible settings, you can change in `config.json`:
 
-```json
+```json5
 {
   "logs_path": "/logs",  // where to save the logs, default: null (dont save them)
   "input_path": "image.jpg",  // input image (as of now, overwrite the argument)
