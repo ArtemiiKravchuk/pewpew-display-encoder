@@ -1,5 +1,7 @@
 """Module for encoding given image"""
 
+import sys
+
 from PIL import Image
 from loguru import logger
 
@@ -32,17 +34,16 @@ def encode_image(size_factor: int, image: Image, sets: dict) -> Image:
 
     encoded_size = encode_36(size_factor, sets)
 
-    # [TODO: fix some awful code]
-    image_bytes = [str(bin(x))[2:].ljust(8, "0") for x in image.tobytes()]
-
-    individual_bytes = []
-    for x in image_bytes:
-        individual_bytes += x
+    pixels = [int(x) for x in image.getdata()]
+    for i, pixel in enumerate(pixels):
+        pixels[i] = "0" if pixel == 0 else "1"
+    # print(pixels)
 
     encoded = encoded_size
-    for i in range(len(individual_bytes)//14):
-        encoded += encode_36(int("".join(individual_bytes[:14]), base=2), sets)
-        individual_bytes = individual_bytes[14:]
+    for i in range(len(pixels)//14):
+        encoded += encode_36(int("".join(pixels[:14]), base=2), sets)
+        # print("Encoding: {}".format(int("".join(pixels[:14]), base=2), sets))
+        pixels = pixels[14:]
         # logger.trace("Encoded bytes: <m>{}</>", encoded)
 
     # image.save("results.png")

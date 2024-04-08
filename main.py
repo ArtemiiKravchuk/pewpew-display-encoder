@@ -127,6 +127,8 @@ def main(config_file: str = "config.json") -> None:
     image = tf.to_bilevel(image, conv_sets["to_bilevel"])
     image = tf.resize_image(image, size_factor, conv_sets["resize"])
 
+    image.save("result.png")
+
     result = ec.encode_image(size_factor, image, encoding_sets)
     # logger.opt(colors=False).success(result)
     with open("results.lua", "w", encoding="UTF-8") as file:
