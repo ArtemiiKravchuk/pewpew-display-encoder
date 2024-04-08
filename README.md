@@ -1,6 +1,6 @@
 # PewPewLive Display Encoder
 
-![glebi's level preview, screenshot by jf](https://jpcdn.it/img/871568d0f51c32374273aaa9524671ad.png)
+![glebi's level preview, screenshot by jf](https://github.com/ArtemiiKravchuk/pewpew-display-encoder/assets/115405408/5abb28ce-31f4-478d-a8cf-edf0eef5ef9d)
 
 Script for encoding images into format, supported by glebi's display level in PewPewLive.
 
